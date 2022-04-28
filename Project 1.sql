@@ -1,17 +1,21 @@
+/* Covid 19 Data Exploration
+
+Skills Used: Joins, CTE's, Windows Functions, Aggregate Functions, Creating Views, Converting Data Types
+*/
+
 Select *
 From PortfolioProject.coviddeath1
 Where continent != ''
 ORDER BY 3, 4;
 
- /*Select *
-From PortfolioProject.covidvaccinations1
-ORDER BY 3, 4;*/
+ /* Select Data that we are going to be starting with */
 
 Select location, date, total_cases, new_cases, total_deaths, population
 From PortfolioProject.coviddeath1
 Order By 1, 2;
 
 /* Looking at Total Cases vs Total Deaths 
+
 Shows likelihood of dying if you contract covid in your country  (using united states in example) */
 
 Select location, date, total_cases, total_deaths, (total_deaths/total_cases)*100 AS death_percentage
@@ -19,15 +23,15 @@ From PortfolioProject.coviddeath1
 Where location like 'United States'
 Order By 1, 2;
 
-/* Looking at Total Cases vs Population 
-Shows what percentage of population got Covid */
+/* Total Cases vs Population 
+Shows what percentage of population infected with Covid */
 
 Select location, date, total_cases, population, (total_cases/population)*100 AS percent_population_infected
 From PortfolioProject.coviddeath1
 Where location like 'United States'
 Order By 1, 2;
 
-/* looking at Countries with Highest Infection Rate compared to Population */
+/* Countries with Highest Infection Rate compared to Population */
 
 Select location, population, MAX(total_cases) AS highest_infection_count, MAX((total_cases/population))*100 AS percent_population_infected
 From PortfolioProject.coviddeath1
@@ -42,10 +46,10 @@ Where continent != ''
 Group By location
 Order By total_death_count desc;
 
-/* Let's break things down by continent */
+/* BREAKING THINGS DOWN BY CONTINENT */
 
 
-/* Showing the continents with the highest death count */
+/* Showing the continents with the highest death count per population */
 
 
 Select continent, MAX(cast(total_deaths as unsigned)) as total_death_count
@@ -57,26 +61,16 @@ Order By total_death_count desc;
 
 /* Global Numbers */
 
-/* Death Precentage by Day */
-
 Select date, SUM(new_cases) as total_cases, SUM(cast(new_deaths as unsigned)) as total_deaths, SUM(new_deaths)/SUM(cast(new_cases as unsigned))*100  AS death_percentage
 From PortfolioProject.coviddeath1
 /* Where location like 'United States' */
 Where continent != ''
-Group BY date
 Order By 1, 2;
 
 
-/* Total Precentage of death */
 
-Select  SUM(new_cases) as total_cases, SUM(cast(new_deaths as unsigned)) as total_deaths, SUM(new_deaths)/SUM(cast(new_cases as unsigned))*100  AS death_percentage
-From PortfolioProject.coviddeath1
-/* Where location like 'United States' */
-Where continent != ''
-Order By 1, 2;
-
-
-/* Looking at Total Population vs Vaccinations */
+/* Total Population vs Vaccinations 
+Shows Percentage of Population that has received at least one Covid Vaccine */
 
 
 Select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations, SUM(cast(vac.new_vaccinations as unsigned)) OVER (Partition By dea.location ORDER BY dea.location, dea.date) as rolling_people_vac 
@@ -87,7 +81,7 @@ JOIN PortfolioProject.covidvaccinations1 vac
 Where dea.continent != ''
 Order BY 2,3;
 
-/* Use CTE */
+/* Use CTE to perform Calculation on Partition By in previous query */
 
 WITH popvsvac (continent, location, date, population,new_vaccinations, rolling_people_vac)
 as
